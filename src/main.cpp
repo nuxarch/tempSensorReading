@@ -1,44 +1,51 @@
 #include <Arduino.h>
-
 // koneksi sensor suhu
 #define SUHU1 A0
 #define SUHU2 A1
 #define SUHU3 A2
 
-// variabel nilai data terbesar
-uint8_t datamax = 0;
-// variabel hasil konversi
-uint16_t dataT1 = 10, dataT2 = 11, dataT3 = 12;
-
+// buat strukture yg dimiliki oleh sebuah sensor
 struct tempSensor_t
 {
-  char *namasensor;
-  uint16_t data;
+  uint8_t koneksi_sensor;
+  String sensorName;
+  uint16_t conversion_data;
 };
-tempSensor_t Sensor1;
+
+tempSensor_t sensT1, sensT2, sensT3;
 
 void setup()
 {
   Serial.begin(115200);
+  // kita isi dulu spek masing-masing sensor
+  sensT1.sensorName = "sensorT1";
+  sensT1.koneksi_sensor = SUHU1;
+  sensT2.sensorName = "sensorT2";
+  sensT2.koneksi_sensor = SUHU2;
+  sensT3.sensorName = "sensorT3";
+  sensT3.koneksi_sensor = SUHU3;
 }
 
 void loop()
 {
-  dataT1 = map(analogRead(A0), 0, 1023, 0, 100);
-  dataT2 = map(analogRead(A1), 0, 1023, 0, 100);
-  dataT3 = map(analogRead(A2), 0, 1023, 0, 100);
+  // konversi 3 data analog menjadi digital
+  sensT1.conversion_data =  map(analogRead(sensT1.koneksi_sensor), 0, 1023, 0, 100);
+  sensT2.conversion_data =  map(analogRead(sensT2.koneksi_sensor), 0, 1023, 0, 100);
+  sensT3.conversion_data =  map(analogRead(sensT3.koneksi_sensor), 0, 1023, 0, 100);
 
+
+  tempSensor_t sensMax;
   // =====================================================================
-  datamax = dataT1;
-  if (datamax < dataT2)
+  sensMax = sensT1;
+  if (sensMax.conversion_data < sensT2.conversion_data)
   {
-    datamax = dataT2;
+    sensMax = sensT2;
   }
-  if (datamax < dataT3)
+  if (sensMax.conversion_data < sensT3.conversion_data)
   {
-    datamax = dataT3;
+    sensMax = sensT3;
   }
-  Serial.println("T1=[" + String(dataT1) + "],T2=[" + String(dataT2) + "], T3=[" + String(dataT3) + "], nilai sensor terbesar: " + String(datamax));
+  Serial.println("T1=[" + String(sensT1.conversion_data) + "],T2=[" + String(sensT2.conversion_data) + "],T3=[" + String(sensT3.conversion_data) + "],nilai sensor terbesar: " + sensMax.sensorName +"["+String(sensMax.conversion_data)+"]");
   // =====================================================================
   delay(500);
 }
